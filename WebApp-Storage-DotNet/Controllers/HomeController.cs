@@ -74,7 +74,9 @@ namespace WebApp_Storage_DotNet.Controllers
             {
                 // Retrieve storage account information from connection string
                 // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(configurationService.GetStorageConnectionString());
+                var connectionstring = await configurationService.GetStorageConnectionString();
+
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionstring);
 
                 // Create a blob client for interacting with the blob service.
                 blobClient = storageAccount.CreateCloudBlobClient();
