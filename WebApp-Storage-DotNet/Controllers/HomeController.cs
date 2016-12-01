@@ -48,6 +48,17 @@ namespace WebApp_Storage_DotNet.Controllers
         static CloudBlobClient blobClient;
         const string blobContainerName = "webappstoragedotnet-imagecontainer";
         static CloudBlobContainer blobContainer;
+        private IConfigurationService configurationService;
+
+        public HomeController():this(new ConfigurationService())
+        {
+
+        }
+
+        public HomeController(IConfigurationService configurationServiceParam)
+        {
+            configurationService = configurationServiceParam;
+        }
 
         /// <summary> 
         /// Task<ActionResult> Index() 
@@ -63,7 +74,7 @@ namespace WebApp_Storage_DotNet.Controllers
             {
                 // Retrieve storage account information from connection string
                 // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"].ToString());
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(configurationService.GetStorageConnectionString());
 
                 // Create a blob client for interacting with the blob service.
                 blobClient = storageAccount.CreateCloudBlobClient();
