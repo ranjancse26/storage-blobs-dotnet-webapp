@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.KeyVault;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,30 @@ namespace WebApp_Storage_DotNet
     }
     public class ConfigurationService : IConfigurationService
     {
-        private static string ConnectionString;
+        private static IConfiguration config;
+
+        async private static Task Initialize()
+        {
+            if(config != null)
+            {
+                return;
+            }
+
+            var builder = new ConfigurationBuilder();
+
+            builder.AddAzureKeyVault(
+                ConfigurationManager.AppSettings["Vault"],
+                ConfigurationManager.AppSettings["ClientId"],
+                ConfigurationManager.AppSettings["ClientSecret"]);
+
+            await Task.Run(() => config = builder.Build());
+        }
 
         public async Task<string> GetStorageConnectionString()
         {
-            if(ConnectionString != null)
-            {
-                return ConnectionString;
-            }
+            await Initialize();
 
-            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
-
-            var value = (await kv.GetSecretAsync(ConfigurationManager.AppSettings["SecretUri"])).Value;
-
-            ConnectionString = value;
-
-            return value;
+            return config[ConfigurationManager.AppSettings["ConnectionStringKey"]];
         }
 
         private static async Task<string> GetToken(string authority, string resource, string scope)
